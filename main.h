@@ -2,10 +2,7 @@
 # define MAIN_H
 
 #include "GLYPH.h"
-
-void (*_update)( void );
-void (*_draw)( void );
-
+#include "roguelike-engine.h"
 
 static const __flash Image TITLE = {
     .height = 64,
