@@ -27,4 +27,6 @@ void init_overground( void );
 void update_overground( void );
 void draw_overground( void );
 
+void update_player( void );
+
 #endif
