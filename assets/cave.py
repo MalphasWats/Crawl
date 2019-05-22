@@ -25,7 +25,12 @@ COLOURS = [
     '#5D1800',
     '#ff0000',
     '#00ff00',
-    '#0000ff'
+    '#0000ff',
+    '#ff00ff',
+    '#ffff00',
+    '#00ffff',
+    '#f0f0f0',
+    '#0f0f0f',
 ]
 
 SOLIDS = [1]
@@ -52,8 +57,8 @@ class Map(object):
 
     def go(self, e=None):
         self.cells = []
-        for y in range(height):
-            for x in range(width):
+        for y in range(self.height):
+            for x in range(self.width):
                 self.cells.append( random.randint(0,1) )
 
         for i in range(1):
@@ -83,12 +88,14 @@ class Map(object):
             self.draw_doors()
         if key == 'e':
             self.kill_diags()
+        if key == 'c':
+            self.label_caverns()
 
         self.draw_nicely()
 
     def kill_diags(self):
-        for y in range(height-1):
-            for x in range(width-1):
+        for y in range(self.height-1):
+            for x in range(self.width-1):
                 blocks = 0
                 blocks |= self.cells[y*self.width+x] << 0
                 blocks |= self.cells[y*self.width+x+1] << 1
@@ -105,8 +112,8 @@ class Map(object):
 
 
     def fill_holes(self):
-        for y in range(height):
-            for x in range(width):
+        for y in range(self.height):
+            for x in range(self.width):
                 if (self.cells[(y*self.width)+x] == 0):
                     noexit = True
                     for i in range(4):
@@ -117,8 +124,8 @@ class Map(object):
         self.generate_signatures()
 
     def trim_points(self):
-        for y in range(height):
-            for x in range(width):
+        for y in range(self.height):
+            for x in range(self.width):
                 if (self.cells[(y*self.width)+x] != 0):
                     cardinal_exits = 0
                     for i in range(4):
@@ -128,9 +135,42 @@ class Map(object):
                         self.cells[(y*self.width)+x] = 0
         self.generate_signatures()
 
+    def label_caverns(self):
+        flag = 2
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.cells[y*self.width+x] == 0: #Floor
+                    self.set_flags(x, y, flag)
+                    flag += 1
+
+        print ("flags:", flag)
+
+    def set_flags(self, x, y, flag):
+        candidates = []
+        candidates.append((x, y))
+        while True:
+            new_candidates = []
+            for c in candidates:
+
+                self.cells[c[1]*self.width+c[0]] = flag
+
+                if self.cells[ (c[1]-1)*self.width+c[0]] == 0:
+                    new_candidates.append((c[0], c[1]-1))
+                if self.cells[ (c[1]+1)*self.width+c[0]] == 0:
+                    new_candidates.append((c[0], c[1]+1))
+                if self.cells[ c[1]*self.width+(c[0]+1)] == 0:
+                    new_candidates.append((c[0]+1, c[1]))
+                if self.cells[ c[1]*self.width+(c[0]-1)] == 0:
+                    new_candidates.append((c[0]-1, c[1]))
+            candidates = new_candidates
+            print(len(candidates))
+            if len(candidates) == 0:
+                break
+
+
     def draw_doors(self):
-        for y in range(height):
-            for x in range(width):
+        for y in range(self.height):
+            for x in range(self.width):
                 if ((( (self.signatures[x][y] & 0b01000010)==0b01000010 and (self.signatures[x][y] & 0b00011000) == 0) or
                    ( (self.signatures[x][y] & 0b01000010)==0 and (self.signatures[x][y] & 0b00011000) == 0b00011000)) and
                    self.cells[(y*self.width)+x] in SOLIDS):
@@ -191,9 +231,6 @@ class Map(object):
 
         self.cells = new_cells
 
-    def collide_with_wall(self, x, y):
-        return self.cells[ y*self.width+x ]
-
     def draw(self):
         print(self.height, self.width)
         for y in range(self.height):
@@ -212,10 +249,6 @@ class Map(object):
                 cel = self.cells[ (y*self.width)+x ]
                 if cel != 0:
                     self.canvas.create_rectangle(x*16, y*16, (x*16)+16, (y*16)+16, fill=COLOURS[cel], outline='')
-
-
-        #self.canvas.after(100, self.draw_nicely)
-
 
 
 if __name__ == '__main__':
