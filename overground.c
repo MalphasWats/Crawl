@@ -1,17 +1,15 @@
 #include "overground.h"
+#include "dungeon.h"
 
-uint32_t button_timer;
 bool fade_done;
 
 void init_overground( void )
 {
     display_mode(INVERTED);
-    frame_timer = t+FRAME_DURATION;
-    f = 0;
 
     button_timer = 0;
 
-    player = (Sprite){.x=2, .y=2, .offset_x=0, .offset_y=0, .tileset=&PLAYER[0]};
+    player = (Sprite){.x=11, .y=4, .offset_x=0, .offset_y=0, .tileset=&PLAYER[0]};
 }
 
 void update_overground( void )
@@ -98,8 +96,9 @@ void wait_for_fade( void )
     if (fade_done)
     {
         player.y+=1;
-        _update = update_overground;
-        _draw = draw_overground;
+        init_dungeon();
+        _update = update_dungeon;
+        _draw = draw_dungeon;
     }
 }
 

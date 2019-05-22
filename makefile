@@ -8,7 +8,7 @@ GLYPHLIB    = ../glyphlib
 VPATH       = $(GLYPHLIB)
 
 LIB        = GLYPH.o roguelike-engine.o
-BUILD      = overground.o main.o
+BUILD      = dungeon.o overground.o main.o
 
 OBJECTS    =  $(LIB) $(BUILD)
 

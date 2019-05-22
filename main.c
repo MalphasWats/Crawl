@@ -5,7 +5,7 @@
 int main (void)
 {
     initialise();
-
+    init_engine();
     _update = update_menu;
     _draw = draw_menu;
 
