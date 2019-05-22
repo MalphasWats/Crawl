@@ -1,6 +1,7 @@
 #include "overground.h"
 
 uint32_t button_timer;
+bool fade_done;
 
 void init_overground( void )
 {
@@ -20,7 +21,7 @@ void update_overground( void )
     if (button_timer <= t)
     {
         button_timer = t+BUTTON_DELAY;
-        
+
         uint8_t buttons;
         buttons = read_buttons();
         if ( buttons & BTN_UP )
@@ -48,7 +49,9 @@ void update_overground( void )
     Tile tile = get_tile_at(&OVERGROUND, player.x, player.y);
     if (tile.flags & EXIT_DOWN_FLAG)
     {
-        _draw = fadeblack;
+        fade_done = FALSE;
+        _update = wait_for_fade;
+        _draw = fade_to_black;
     }
 }
 
@@ -60,51 +63,44 @@ void draw_overground( void )
     draw_sprite(&player);
 }
 
-void fadeblack( void )
+void fade_to_black( void )
 {
-    //TEMP: set lights!
-    //set_LED_brightness(BOTH, 128);
+    uint8_t masks[3] = {
+        0b01010101, 0b11111111, 0b10101010,
+    };
+    uint8_t steps[3] = {
+        1, 2, 1,
+    };
+    uint32_t timer;
 
-    uint32_t timer=millis()+160;
-
-    while(millis()<timer){}
-    for (uint8_t y=0 ; y<8 ; y++)
+    for(uint8_t i=0 ; i<3 ; i++)
     {
-        for (uint8_t x=0 ; x<128 ; x++)
+        timer=millis()+160;
+        while(millis()<timer){}
+        for (uint8_t y=0 ; y<8 ; y++)
         {
-            buffer[y*SCREEN_WIDTH+x] |= 0b01010101;
+            for (uint8_t x=0 ; x<128 ; x+=steps[i])
+            {
+                buffer[y*SCREEN_WIDTH+x] |= masks[i];
+            }
         }
+        draw();
     }
-    draw();
-    timer = millis()+160;
-    while(millis()<timer){}
-
-    for (uint8_t y=0 ; y<8 ; y++)
-    {
-        for (uint8_t x=0 ; x<128 ; x+=2)
-        {
-            buffer[y*SCREEN_WIDTH+x] |= 0b11111111;
-        }
-    }
-    draw();
-    timer = millis()+160;
-    while(millis()<timer){}
-
-    for (uint8_t y=0 ; y<8 ; y++)
-    {
-        for (uint8_t x=0 ; x<128 ; x++)
-        {
-            buffer[y*SCREEN_WIDTH+x] |= 0b10101010;
-        }
-    }
-    draw();
 
     timer = millis()+160;
     while(millis()<timer){}
 
-    //_update = new thing
-    player.y+=1;
-    _draw = draw_overground;
+    fade_done = TRUE;
+}
+
+void wait_for_fade( void )
+{
+    if (fade_done)
+    {
+        player.y+=1;
+        _update = update_overground;
+        _draw = draw_overground;
+    }
 }
 
 void move_player(int8_t dx, int8_t dy)
