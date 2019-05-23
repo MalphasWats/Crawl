@@ -15,7 +15,7 @@ void init_overground( void )
         for (uint8_t x=0 ; x<OVERGROUND.cols ; x++)
             map->tiles[y*OVERGROUND.cols+x] = OVERGROUND.tiles[y*OVERGROUND.cols+x];
 
-    player = (Sprite){.x=11, .y=4, .offset_x=0, .offset_y=0, .tileset=&PLAYER[0]};
+    player = (Sprite){.x=11, .y=4, .offset_x=0, .offset_y=0, .tileset=&PLAYER[0], .flipped=FALSE};
 
     _update = update_overground;
     _draw = draw_overground;
