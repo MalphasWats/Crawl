@@ -11,8 +11,7 @@ void init_dungeon( void )
     map->rows = 16;
     for (uint16_t i=0 ; i<32*16 ; i++)
         map->tiles[i] = TEST_DUNGEON.tiles[i];
-
-    //player = (Sprite){.x=3, .y=3, .offset_x=0, .offset_y=0, .tileset=&PLAYER[0]};
+    
     player.x=3;
     player.y=3;
 
@@ -26,9 +25,12 @@ void update_dungeon( void )
 {
     update_engine();
 
-    // Check where we're standing here...
+    Tile tile;
 
-    check_move();
+    // Check for exit here...
+
+    tile = check_move();
+
 }
 
 void draw_dungeon( void )

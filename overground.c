@@ -35,7 +35,7 @@ void update_overground( void )
         _draw = fade_to_black;
     }
 
-    check_move();
+    tile = check_move();
 }
 
 void draw_overground( void )
