@@ -167,7 +167,7 @@ class Map(object):
 
                 #print(format(blocks, '#010b'))
 
-                if blocks == 0b0110: #0b1001:
+                if blocks == 0b0110 or blocks == 0b0100 or blocks == 0b0010: #0b1001:
                     if self.cells[y*self.width+x] != self.cells[y*self.width+x+3]:
                         self.cells[y*self.width+x+1] = 2
                         self.cells[y*self.width+x+2] = 2
@@ -186,7 +186,7 @@ class Map(object):
 
                 #print(format(blocks, '#010b'))
 
-                if blocks == 0b0110: #0b1001:
+                if blocks == 0b0110 or blocks == 0b0100 or blocks == 0b0010: #0b1001:
                     if self.cells[y*self.width+x] != self.cells[(y+3)*self.width+x]:
                         self.cells[(y+1)*self.width+x] = 2
                         self.cells[(y+2)*self.width+x] = 2
