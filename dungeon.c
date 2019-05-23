@@ -35,7 +35,7 @@ void update_dungeon( void )
 void draw_dungeon( void )
 {
     clear_buffer();
-    draw_map(map);
+    draw_map();//map);
 
     draw_sprite(&player);
 }

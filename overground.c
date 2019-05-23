@@ -37,7 +37,7 @@ void update_overground( void )
 void draw_overground( void )
 {
     clear_buffer();
-    draw_map(map);
+    draw_map();//map);
 
     draw_sprite(&player);
 }
