@@ -29,7 +29,4 @@ void draw_overground( void );
 void fade_to_black( void );
 void wait_for_fade( void );
 
-void move_player(int8_t dx, int8_t dy);
-void update_player( void );
-
 #endif

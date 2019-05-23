@@ -4,7 +4,6 @@
 #include "GLYPH.h"
 #include "roguelike-engine.h"
 
-#define COLLIDE_FLAG   0b10000000
 #define EXIT_DOWN_FLAG 0b00000001
 
 static const __flash Tile TILES[] = {

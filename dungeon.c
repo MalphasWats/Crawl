@@ -11,12 +11,25 @@ void init_dungeon( void )
     for (uint16_t i=0 ; i<32*16 ; i++)
         map->tiles[i] = TEST_DUNGEON.tiles[i];
 
-    player = (Sprite){.x=3, .y=3, .offset_x=0, .offset_y=0, .tileset=&PLAYER[0]};
+    //player = (Sprite){.x=3, .y=3, .offset_x=0, .offset_y=0, .tileset=&PLAYER[0]};
+    player.x=3;
+    player.y=3;
+
+    _update = update_dungeon;
+    _draw = draw_dungeon;
+    _update_return = _update;
+    _draw_return = _draw;
 }
 
 void update_dungeon( void )
 {
     update_engine();
+
+    Tile tile = check_move();
+    if (tile.flags & EXIT_DOWN_FLAG)
+    {
+        //
+    }
 }
 
 void draw_dungeon( void )

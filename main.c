@@ -28,8 +28,6 @@ void update_menu( void )
     if(buttons == BTN_A)
     {
         init_overground();
-        _update = update_overground;
-        _draw = draw_overground;
     }
 }
 
