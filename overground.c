@@ -7,7 +7,11 @@ void init_overground( void )
 {
     display_mode(INVERTED);
 
-    for (uint8_t y=0 ; y<OVERGROUND.cols ; y++)
+    map->tileset = &TILES[0];
+    map->cols = 16;
+    map->rows = 8;
+
+    for (uint8_t y=0 ; y<OVERGROUND.rows ; y++)
         for (uint8_t x=0 ; x<OVERGROUND.cols ; x++)
             map->tiles[y*OVERGROUND.cols+x] = OVERGROUND.tiles[y*OVERGROUND.cols+x];
 
@@ -23,15 +27,15 @@ void update_overground( void )
 {
     update_engine();
 
-    Tile tile = check_move();
-
-    //Tile tile = get_tile_at(map, player.x, player.y);
+    Tile tile = get_tile_at(player.x, player.y);
     if (tile.flags & EXIT_DOWN_FLAG)
     {
         fade_done = FALSE;
         _update = wait_for_fade;
         _draw = fade_to_black;
     }
+
+    check_move();
 }
 
 void draw_overground( void )
