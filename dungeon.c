@@ -11,9 +11,9 @@ void init_dungeon( void )
     map->rows = 16;
     for (uint16_t i=0 ; i<32*16 ; i++)
         map->tiles[i] = TEST_DUNGEON.tiles[i];
-    
+
     player.x=3;
-    player.y=3;
+    player.y=2;
 
     _update = update_dungeon;
     _draw = draw_dungeon;
