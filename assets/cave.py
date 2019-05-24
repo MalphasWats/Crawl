@@ -400,7 +400,7 @@ if __name__ == '__main__':
     Welcome to MapGen
 
     Instructions: <space> generates a random Map
-                  Press 'B' to run through a full generation sequence
+                  Press 'b' to run through a full generation sequence
 
                   Or:
                     'a': run Cellular Automator
