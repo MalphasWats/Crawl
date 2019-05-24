@@ -38,7 +38,7 @@ typedef struct Window {
 
     char* content;
 
-    void (*_callback)( void );
+    void (*_callback)( uint8_t i );
 } Window;
 
 bool add_window(Window w);
