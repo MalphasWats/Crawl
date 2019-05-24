@@ -396,6 +396,25 @@ if __name__ == '__main__':
     height = 16
     width = 32
 
+    print("""
+    Welcome to MapGen
+
+    Instructions: <space> generates a random Map
+                  Press 'B' to run through a full generation sequence
+
+                  Or:
+                    'a': run Cellular Automator
+                    'f': fill in small gaps
+                    't': trim pointy bits
+                    'e': remove diagonal gaps
+                    'c': identify caverns
+                    'w': worm connections between caverns
+                    'r': reset floor
+                    'x': remove all but biggest cavern (must use 'c' first)
+                    'd': place doors (must use 'r' first)
+                    's': save cavern to a file
+    """)
+
     #tk = Tk()
 
     #canvas = Canvas(tk, width=width*16, height=height*16)
