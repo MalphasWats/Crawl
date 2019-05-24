@@ -96,8 +96,8 @@ class Map(object):
             self.fill_holes()
         if key == 't':
             self.trim_points()
-        #if key == 'd':
-        #    self.draw_doors()
+        if key == 'd':
+            self.draw_doors()
         if key == 'e':
             self.kill_diags()
         if key == 'c':
@@ -108,6 +108,8 @@ class Map(object):
             self.reset_floor()
         if key == 'x':
             self.remove_small_caverns()
+        if key == 's':
+            self.save_cave()
         if key == 'b':
             self._apply_automaton((6, 7, 8), (3, 4, 5, 6, 7, 8))
             self.fill_holes()
@@ -120,6 +122,9 @@ class Map(object):
 
             if (num_caverns > 1):
                 self.remove_small_caverns()
+            self.reset_floor()
+            self.draw_doors()
+            self.label_caverns()
 
         self.draw_nicely()
 
@@ -171,6 +176,8 @@ class Map(object):
                     if self.cells[y*self.width+x] != self.cells[y*self.width+x+3]:
                         self.cells[y*self.width+x+1] = 2
                         self.cells[y*self.width+x+2] = 2
+                        self.reset_floor()
+                        self.label_caverns()
 
         for y in range(self.height-3):
             for x in range(self.width):
@@ -190,6 +197,8 @@ class Map(object):
                     if self.cells[y*self.width+x] != self.cells[(y+3)*self.width+x]:
                         self.cells[(y+1)*self.width+x] = 2
                         self.cells[(y+2)*self.width+x] = 2
+                        self.reset_floor()
+                        self.label_caverns()
 
         self.generate_signatures()
 
@@ -259,16 +268,16 @@ class Map(object):
 
                 self.cells[c[1]*self.width+c[0]] = flag
 
-                if self.cells[ (c[1]-1)*self.width+c[0]] in [0, 2]:
+                if self.cells[ (c[1]-1)*self.width+c[0]] in [0]:#, 2]:
                     if (c[0], c[1]-1) not in new_candidates:
                       new_candidates.append((c[0], c[1]-1))
-                if self.cells[ (c[1]+1)*self.width+c[0]] in [0, 2]:
+                if self.cells[ (c[1]+1)*self.width+c[0]] in [0]:#, 2]:
                     if (c[0], c[1]+1) not in new_candidates:
                         new_candidates.append((c[0], c[1]+1))
-                if self.cells[ c[1]*self.width+(c[0]+1)] in [0, 2]:
+                if self.cells[ c[1]*self.width+(c[0]+1)] in [0]:#, 2]:
                     if (c[0]+1, c[1]) not in new_candidates:
                         new_candidates.append((c[0]+1, c[1]))
-                if self.cells[ c[1]*self.width+(c[0]-1)] in [0, 2]:
+                if self.cells[ c[1]*self.width+(c[0]-1)] in [0]:#, 2]:
                     if (c[0]-1, c[1]) not in new_candidates:
                         new_candidates.append((c[0]-1, c[1]))
             candidates = new_candidates
@@ -278,22 +287,24 @@ class Map(object):
 
     def draw_doors(self):
         self.generate_signatures()
-        doors = []
+        #doors = []
         for y in range(self.height):
             for x in range(self.width):
                 if ((self.signatures[x][y] & 0b01000010)==0b01000010 and
-                    (self.signatures[x][y] & 0b00011000) == 0):
-                    if self.cells[ y*self.width+(x-1) ] != self.cells[ y*self.width+(x+1) ]:
+                    (self.signatures[x][y] & 0b00011000) == 0 and
+                    self.cells[y*self.width+x] == 0):
+                    if self.cells[ y*self.width+(x-1) ] != 2 and self.cells[ y*self.width+(x+1) ] != 2 and self.cells[ y*self.width+(x-2) ] != 2 and self.cells[ y*self.width+(x+2) ] != 2:
                         self.cells[(y*self.width)+x] = 2
-                        doors.append((x, y))
+                        #doors.append((x, y))
 
                 if ((self.signatures[x][y] & 0b01000010)==0 and
-                    (self.signatures[x][y] & 0b00011000) == 0b00011000):
-                    if self.cells[ (y-1)*self.width+x ] != self.cells[ (y+1)*self.width+x ]:
+                    (self.signatures[x][y] & 0b00011000) == 0b00011000 and
+                    self.cells[y*self.width+x] == 0):
+                    if self.cells[ (y-1)*self.width+x ] != 2 and self.cells[ (y+1)*self.width+x ] != 2 and self.cells[ (y-2)*self.width+x ] != 2 and self.cells[ (y+2)*self.width+x ] != 2:
                         self.cells[(y*self.width)+x] = 2
-                        doors.append((x, y))
+                        #doors.append((x, y))
 
-        return doors
+        #return doors
 
     def generate_signatures(self):
         self.signatures = [ [0]*self.height for _ in range(self.width) ]
@@ -368,6 +379,17 @@ class Map(object):
                 cel = self.cells[ (y*self.width)+x ]
                 if cel != 0:
                     self.canvas.create_rectangle(x*16, y*16, (x*16)+16, (y*16)+16, fill=COLOURS[cel], outline='')
+
+    def save_cave(self):
+        with open('cave.txt', 'w') as f:
+            cells = self.cells
+            while len(cells) > 0:
+                row = cells[0:32]
+                cells = cells[32:]
+                for c in row:
+                    f.write("{:>3}, ".format(c))
+                f.write('\n')
+
 
 
 if __name__ == '__main__':
