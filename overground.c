@@ -36,9 +36,8 @@ void update_overground( void )
 {
     update_engine();
 
-    //Tile tile = get_tile_at(player.x, player.y);
-    //if (tile.flags & EXIT_DOWN_FLAG)
-    if (collide_tile.flags & EXIT_DOWN_FLAG)
+    Tile tile = get_tile_at(player.x, player.y);
+    if (tile.flags & EXIT_DOWN_FLAG)
     {
         fade_done = FALSE;
         _update = wait_for_fade;

@@ -37,25 +37,33 @@ void init_dungeon( void )
         ._callback=0,
     };
 
-    add_window(message);
+    add_window(&message);
 }
 
 void update_dungeon( void )
 {
     update_engine();
 
-    CollideType c;
-
     // Check for exit here...
 
-    c = check_move();
+    CollideType c = check_move();
     if (c == MAP)
     {
         // Check for doors/chests etc.
+        Tile tile = get_tile_at(collide_x, collide_y);
+        if (tile.flags & FLAG_CHEST)
+        {
+            click();
+            sprintf(message_buffer, "CHEST");
+            message.timer = millis()+2500;
+
+            map->tiles[collide_y*map->cols+collide_x] += 1;
+        }
     }
     else if (c == MOB)
     {
         // Attack mob
+        click();
     }
 
 }

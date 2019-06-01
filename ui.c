@@ -4,15 +4,15 @@ void init_windows( void )
 {
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
-        windows[i].timer = 0;
+        windows[i] = 0;
     }
 }
 
-bool add_window(Window w)
+bool add_window(Window* w)
 {
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
-        if (windows[i].timer == 0)
+        if (windows[i] == 0)
         {
             windows[i] = w;
             return TRUE;
@@ -25,9 +25,9 @@ void update_windows( void )
 {
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
-        if (windows[i].timer <= millis())
+        if (windows[i]->timer <= millis())
         {
-            windows[i].timer = 0;
+            windows[i]->timer = 0;
         }
     }
 }
@@ -36,9 +36,9 @@ void draw_windows( void )
 {
     for(uint8_t i=0 ; i<MAX_WINDOWS ; i++)
     {
-        if (windows[i].timer != 0)
+        if (windows[i]->timer != 0)
         {
-            draw_window(&windows[i]);
+            draw_window(windows[i]);
         }
     }
 }
@@ -58,14 +58,18 @@ void draw_window(Window* w)
                 tile = WIN_BL;
             else if (x==w->w-1 && y==w->h-1)
                 tile = WIN_BR;
-            else if (x==w->w-1 || x==0)
-                tile = WIN_LR;
-            else if (y==w->h-1 || y==0)
-                tile = WIN_TB;
+            else if (x==0)
+                tile = WIN_L;
+            else if (x==w->w-1)
+                tile = WIN_R;
+            else if (y==0)
+                tile = WIN_T;
+            else if (y==w->h-1)
+                tile = WIN_B;
             else
                 tile = WIN_EM;
 
-            draw_tile(&WINDOW_TILES[tile], &BLOCK_MASKS[OPAQUE], (w->x+x)*8, (w->y+y)*8, FALSE);
+            draw_tile(&WINDOW_TILES[tile], &WINDOW_TILE_MASKS[tile], (w->x+x)*8, (w->y+y)*8, FALSE);
         }
     }
     //TODO: deal with \n in content
