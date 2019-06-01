@@ -1,19 +1,23 @@
 #include "main.h"
 
 #include "overground.h"
+#include "ui.h"
 
 int main (void)
 {
     initialise();
     init_engine();
+    init_windows();
     _update = update_menu;
     _draw = draw_menu;
 
     for(ever)
     {
+        update_windows();
         _update();
 
         _draw();
+        draw_windows();
         draw();
     }
 }

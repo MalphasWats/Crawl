@@ -7,7 +7,7 @@ TARGET      = crawl
 GLYPHLIB    = ../glyphlib
 VPATH       = $(GLYPHLIB)
 
-LIB        = GLYPH.o roguelike-engine.o
+LIB        = GLYPH.o roguelike-engine.o ui.o
 BUILD      = dungeon.o overground.o main.o
 
 OBJECTS    =  $(LIB) $(BUILD)
@@ -41,8 +41,8 @@ clean:
 	rm -f $(TARGET).hex $(TARGET).elf $(OBJECTS)
 
 size: $(TARGET).elf
-	avr-size --format=avr --mcu=$(DEVICE) $(TARGET).elf
 	avr-nm -S -td --size-sort $(TARGET).elf
+	avr-size --format=avr --mcu=$(DEVICE) $(TARGET).elf
 
 # file targets:
 $(TARGET).elf: $(OBJECTS)
