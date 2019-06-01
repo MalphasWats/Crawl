@@ -24,6 +24,11 @@ void init_overground( void )
         .flipped=FALSE,
         .alive=TRUE,
         .type=MOB_PLAYER,
+
+        .hp=5,
+        .max_hp=5,
+        .damage=1,
+        .defence=0,
     };
 
     _update = update_overground;
@@ -50,7 +55,7 @@ void update_overground( void )
 void draw_overground( void )
 {
     clear_buffer();
-    draw_map();//map);
+    draw_map();
 
     draw_mob(&player);
 }

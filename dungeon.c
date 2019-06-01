@@ -64,8 +64,11 @@ void update_dungeon( void )
     {
         // Attack mob
         click();
+
+        hit_mob(&player, collide_mob);
     }
 
+    // Update Mobs?
 }
 
 void draw_dungeon( void )
@@ -127,8 +130,28 @@ void spawn_mob(uint8_t x, uint8_t y, uint8_t mob)
                 .flipped=FALSE,
                 .alive=TRUE,
                 .type=mob,
+
+                .hp=1,
+                .max_hp=1,
+                .damage=1,
+                .defence=0,
             };
             break;
         }
     }
+}
+
+void hit_mob(Mob* attacker, Mob* defender)
+{
+    //TODO: deal with defence
+    defender->hp -= attacker->damage;
+
+    add_floater((Floater){
+        .x=defender->x*8,
+        .y=defender->y*8 - 4,
+        .counter=0,
+        .timer=t+FLOATER_DELAY,
+        .tileset=&DAMAGE_FLOATERS[0],
+        .value=attacker->damage,
+    });
 }

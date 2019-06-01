@@ -14,9 +14,11 @@ int main (void)
     for(ever)
     {
         update_windows();
+        update_floaters();
         _update();
 
         _draw();
+        draw_floaters();
         draw_windows();
         draw();
     }
