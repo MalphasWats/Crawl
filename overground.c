@@ -15,7 +15,16 @@ void init_overground( void )
         for (uint8_t x=0 ; x<OVERGROUND.cols ; x++)
             map->tiles[y*OVERGROUND.cols+x] = OVERGROUND.tiles[y*OVERGROUND.cols+x];
 
-    player = (Sprite){.x=11, .y=4, .offset_x=0, .offset_y=0, .tileset=&PLAYER[0], .flipped=FALSE};
+    player = (Mob){
+        .x=11,
+        .y=4,
+        .offset_x=0,
+        .offset_y=0,
+        .tileset=&PLAYER[0],
+        .flipped=FALSE,
+        .alive=TRUE,
+        .type=MOB_PLAYER,
+    };
 
     _update = update_overground;
     _draw = draw_overground;
@@ -27,15 +36,16 @@ void update_overground( void )
 {
     update_engine();
 
-    Tile tile = get_tile_at(player.x, player.y);
-    if (tile.flags & EXIT_DOWN_FLAG)
+    //Tile tile = get_tile_at(player.x, player.y);
+    //if (tile.flags & EXIT_DOWN_FLAG)
+    if (collide_tile.flags & EXIT_DOWN_FLAG)
     {
         fade_done = FALSE;
         _update = wait_for_fade;
         _draw = fade_to_black;
     }
 
-    tile = check_move();
+    check_move();
 }
 
 void draw_overground( void )
@@ -43,7 +53,7 @@ void draw_overground( void )
     clear_buffer();
     draw_map();//map);
 
-    draw_sprite(&player);
+    draw_mob(&player);
 }
 
 

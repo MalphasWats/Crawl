@@ -44,22 +44,36 @@ void update_dungeon( void )
 {
     update_engine();
 
-    Tile tile;
+    CollideType c;
 
     // Check for exit here...
 
-    tile = check_move();
-    if (tile.flags)
-        return;
+    c = check_move();
+    if (c == MAP)
+    {
+        // Check for doors/chests etc.
+    }
+    else if (c == MOB)
+    {
+        // Attack mob
+    }
 
 }
 
 void draw_dungeon( void )
 {
     clear_buffer();
-    draw_map();//map);
+    draw_map();
 
-    draw_sprite(&player);
+    for (uint8_t m=0 ; m<MAX_MOBS ; m++)
+    {
+        if (mobs[m].alive)
+        {
+            draw_mob(&mobs[m]);
+        }
+    }
+
+    draw_mob(&player);
 }
 
 
@@ -73,10 +87,40 @@ void generate_dungeon( void )
     {
         for (uint8_t x=0 ; x<map->cols ; x++)
         {
-            map->tiles[y*map->cols+x] = TEST_DUNGEON.tiles[y*map->cols+x];
+            if (TEST_DUNGEON.tiles[y*map->cols+x] == 16) // Test monster
+            {
+                map->tiles[y*map->cols+x] = 3;
+                spawn_mob(x, y, MOB_BLOB);
+            }
+            else
+            {
+                map->tiles[y*map->cols+x] = TEST_DUNGEON.tiles[y*map->cols+x];
+            }
         }
     }
 
     player.x=3;
     player.y=2;
+}
+
+void spawn_mob(uint8_t x, uint8_t y, uint8_t mob)
+{
+    //TODO: use mob var to spawn different types
+    for (uint8_t m=0 ; m<MAX_MOBS ; m++)
+    {
+        if (!mobs[m].alive)
+        {
+            mobs[m] = (Mob){
+                .x=x,
+                .y=y,
+                .offset_x=0,
+                .offset_y=0,
+                .tileset=&BLOB[0],
+                .flipped=FALSE,
+                .alive=TRUE,
+                .type=mob,
+            };
+            break;
+        }
+    }
 }
