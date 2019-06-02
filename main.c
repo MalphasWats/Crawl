@@ -7,19 +7,17 @@ int main (void)
 {
     initialise();
     init_engine();
-    init_windows();
     _update = update_menu;
     _draw = draw_menu;
 
     for(ever)
     {
-        update_windows();
-        update_floaters();
+        update_engine();
         _update();
 
         _draw();
         draw_floaters();
-        draw_windows();
+        //draw_windows();
         draw();
     }
 }

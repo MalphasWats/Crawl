@@ -3,11 +3,8 @@
 #include <stdio.h>
 
 #include "tiles.h"
-#include "ui.h"
 
 uint8_t level;
-char message_buffer[7];
-Window message;
 
 void init_dungeon( void )
 {
@@ -20,33 +17,24 @@ void init_dungeon( void )
     _draw = draw_dungeon;
     _update_return = _update;
     _draw_return = _draw;
-
-    sprintf(message_buffer, "LEVEL %d", level);
-
-    message = (Window){
-        .x=3,
-        .y=3,
-        .w=10,
-        .h=3,
-
-        .actions=TIMED,
-
-        .timer=t + 3000,
-
-        .content=&message_buffer[0],
-        ._callback=0,
-    };
-
-    add_window(&message);
 }
 
 void update_dungeon( void )
 {
-    update_engine();
-
     // Check for exit here...
 
-    CollideType c = check_move();
+    check_player_turn();
+
+    //place corpses.
+    for (uint8_t m=0 ; m<MAX_MOBS ; m++)
+    {
+        if (!mobs[m].alive)
+        {
+            map->tiles[mobs[m].y*map->cols+mobs[m].x] = SKULL_TILE;
+        }
+    }
+
+    /*CollideType c = check_move();
     if (c == MAP)
     {
         // Check for doors/chests etc.
@@ -66,9 +54,11 @@ void update_dungeon( void )
         click();
 
         hit_mob(&player, collide_mob);
-    }
+    }*/
 
     // Update Mobs?
+    //TODO: separate function
+
 }
 
 void draw_dungeon( void )
@@ -135,23 +125,10 @@ void spawn_mob(uint8_t x, uint8_t y, uint8_t mob)
                 .max_hp=1,
                 .damage=1,
                 .defence=0,
+
+                .aggro=FALSE,
             };
             break;
         }
     }
-}
-
-void hit_mob(Mob* attacker, Mob* defender)
-{
-    //TODO: deal with defence
-    defender->hp -= attacker->damage;
-
-    add_floater((Floater){
-        .x=defender->x*8,
-        .y=defender->y*8 - 4,
-        .counter=0,
-        .timer=t+FLOATER_DELAY,
-        .tileset=&DAMAGE_FLOATERS[0],
-        .value=attacker->damage,
-    });
 }

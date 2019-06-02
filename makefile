@@ -7,7 +7,7 @@ TARGET      = crawl
 GLYPHLIB    = ../glyphlib
 VPATH       = $(GLYPHLIB)
 
-LIB        = GLYPH.o roguelike-engine.o ui.o
+LIB        = GLYPH.o roguelike-engine.o #ui.o
 BUILD      = dungeon.o overground.o main.o
 
 OBJECTS    =  $(LIB) $(BUILD)

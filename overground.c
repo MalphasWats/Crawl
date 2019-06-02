@@ -39,8 +39,6 @@ void init_overground( void )
 
 void update_overground( void )
 {
-    update_engine();
-
     Tile tile = get_tile_at(player.x, player.y);
     if (tile.flags & EXIT_DOWN_FLAG)
     {
@@ -49,7 +47,7 @@ void update_overground( void )
         _draw = fade_to_black;
     }
 
-    check_move();
+    check_player_turn();
 }
 
 void draw_overground( void )
