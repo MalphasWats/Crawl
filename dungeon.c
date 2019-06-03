@@ -18,9 +18,9 @@ void init_dungeon( void )
     _draw_return = _draw;
 
     dgn_messg = (Window){
-        .x=3,
+        .x=5,
         .y=3,
-        .w=10,
+        .w=6,
         .h=3,
 
         .actions=TIMED,
@@ -36,8 +36,8 @@ void init_dungeon( void )
 
 void wndw_level(Window* w)
 {
-    draw_small_string("LEVEL ", (w->x+1)*8, (w->y+1)*8);
-    draw_small_int(level, 2, (w->x+7)*8, (w->y+1)*8);
+    draw_small_string("LEVEL ", (w->x+1)*8, (w->y+1)*8+2);
+    draw_small_int(level, 2, (w->x+4)*8, (w->y+1)*8+2);
 }
 
 void update_dungeon( void )
