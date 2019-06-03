@@ -7,13 +7,14 @@ TARGET      = crawl
 GLYPHLIB    = ../glyphlib
 VPATH       = $(GLYPHLIB)
 
-LIB        = GLYPH.o roguelike-engine.o #ui.o
+LIB        = GLYPH.o roguelike-engine.o ui.o
 BUILD      = dungeon.o overground.o main.o
 
 OBJECTS    =  $(LIB) $(BUILD)
 
 DEVICE     = atmega1284p
 PROGRAMMER = -cstk500v2 -P/dev/ttyACM0 -B0.5
+#PROGRAMMER = -cstk500v2 -PCOM3 -B0.5
 
 C_FLAGS    = -Wl,--gc-sections -Wl,--relax -ffunction-sections -fdata-sections -fno-inline-small-functions -fpack-struct -fshort-enums
 

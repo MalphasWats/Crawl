@@ -3,6 +3,7 @@
 
 #include "GLYPH.h"
 #include "roguelike-engine.h"
+#include "ui.h"
 
 #include "tiles.h"
 
@@ -33,6 +34,8 @@ static const __flash Map TEST_DUNGEON = {
 void init_dungeon( void );
 void update_dungeon( void );
 void draw_dungeon( void );
+
+void wndw_level(Window* w);
 
 void generate_dungeon( void );
 void spawn_mob(uint8_t x, uint8_t y, uint8_t mob);

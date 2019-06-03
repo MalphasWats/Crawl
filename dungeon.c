@@ -1,10 +1,9 @@
 #include "dungeon.h"
 
-#include <stdio.h>
-
 #include "tiles.h"
 
 uint8_t level;
+Window dgn_messg;
 
 void init_dungeon( void )
 {
@@ -17,6 +16,28 @@ void init_dungeon( void )
     _draw = draw_dungeon;
     _update_return = _update;
     _draw_return = _draw;
+
+    dgn_messg = (Window){
+        .x=3,
+        .y=3,
+        .w=10,
+        .h=3,
+
+        .actions=TIMED,
+
+        .timer=t + 3000,
+
+        ._draw=wndw_level,
+        ._callback=0,
+    };
+
+    show_window(&dgn_messg);
+}
+
+void wndw_level(Window* w)
+{
+    draw_string("LEVEL ", (w->x+1)*8, (w->y+1)*8);
+    draw_int(level, 2, (w->x+7)*8, (w->y+1)*8);
 }
 
 void update_dungeon( void )
@@ -33,32 +54,6 @@ void update_dungeon( void )
             map->tiles[mobs[m].y*map->cols+mobs[m].x] = SKULL_TILE;
         }
     }
-
-    /*CollideType c = check_move();
-    if (c == MAP)
-    {
-        // Check for doors/chests etc.
-        Tile tile = get_tile_at(collide_x, collide_y);
-        if (tile.flags & FLAG_CHEST)
-        {
-            click();
-            sprintf(message_buffer, "CHEST");
-            message.timer = millis()+2500;
-
-            map->tiles[collide_y*map->cols+collide_x] += 1;
-        }
-    }
-    else if (c == MOB)
-    {
-        // Attack mob
-        click();
-
-        hit_mob(&player, collide_mob);
-    }*/
-
-    // Update Mobs?
-    //TODO: separate function
-
 }
 
 void draw_dungeon( void )
@@ -81,9 +76,9 @@ void draw_dungeon( void )
 void generate_dungeon( void )
 {
     // Copy test map
-    map->tileset = &TILES[0];
-    map->cols = 32;
-    map->rows = 16;
+    map->tileset = TEST_DUNGEON.tileset;
+    map->cols = TEST_DUNGEON.cols;
+    map->rows = TEST_DUNGEON.rows;
     for (uint8_t y=0 ; y<map->rows ; y++)
     {
         for (uint8_t x=0 ; x<map->cols ; x++)

@@ -12,13 +12,7 @@ int main (void)
 
     for(ever)
     {
-        update_engine();
-        _update();
-
-        _draw();
-        draw_floaters();
-        //draw_windows();
-        draw();
+        gameloop();
     }
 }
 

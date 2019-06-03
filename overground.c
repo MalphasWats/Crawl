@@ -7,13 +7,17 @@ void init_overground( void )
 {
     display_mode(INVERTED);
 
-    map->tileset = &TILES[0];
-    map->cols = 16;
-    map->rows = 8;
+    map->tileset = OVERGROUND.tileset;
+    map->cols = OVERGROUND.cols;
+    map->rows = OVERGROUND.rows;
 
-    for (uint8_t y=0 ; y<OVERGROUND.rows ; y++)
-        for (uint8_t x=0 ; x<OVERGROUND.cols ; x++)
-            map->tiles[y*OVERGROUND.cols+x] = OVERGROUND.tiles[y*OVERGROUND.cols+x];
+    for (uint8_t y=0 ; y<map->rows ; y++)
+    {
+        for (uint8_t x=0 ; x<map->cols ; x++)
+        {
+            map->tiles[y*map->cols+x] = OVERGROUND.tiles[y*map->cols+x];
+        }
+    }
 
     player = (Mob){
         .x=11,
