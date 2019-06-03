@@ -37,7 +37,7 @@ void init_dungeon( void )
 void wndw_level(Window* w)
 {
     draw_small_string("LEVEL ", (w->x+1)*8, (w->y+1)*8+2);
-    draw_small_int(level, 2, (w->x+4)*8, (w->y+1)*8+2);
+    draw_small_int(level, 0, (w->x+4)*8, (w->y+1)*8+2);
 }
 
 void update_dungeon( void )
