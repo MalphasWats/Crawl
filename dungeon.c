@@ -22,16 +22,10 @@ void init_dungeon( void )
         .y=3,
         .w=6,
         .h=3,
-
-        .actions=TIMED,
-
-        .timer=t + 3000,
-
         ._draw=wndw_level,
-        ._callback=0,
     };
 
-    show_window(&dgn_messg);
+    show_window(&dgn_messg, THREE_SECONDS);
 }
 
 void wndw_level(Window* w)
