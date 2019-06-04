@@ -17,6 +17,12 @@ void init_dungeon( void )
     _update_return = _update;
     _draw_return = _draw;
 
+    loot_table = &LOOT_TABLE;
+
+    give_item(&loot_table->items[0]);
+    give_item(&loot_table->items[1]);
+    give_item(&loot_table->items[2]);
+
     dgn_messg = (Window){
         .x=5,
         .y=3,

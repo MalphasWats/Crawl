@@ -31,6 +31,15 @@ static const __flash Map TEST_DUNGEON = {
     }
 };
 
+static const __flash LootTable LOOT_TABLE = {
+    .num_items=3,
+    .items = {
+        {.name="Rusty Sword", .tile={0x03, 0x05, 0x0a, 0x54, 0x68, 0x30, 0x58, 0x80,}, .type=WEAPON, .value=1, .rarity=0,},
+        {.name="Leather Armour", .tile={0x0e, 0x67, 0xff, 0xfc, 0xfc, 0xff, 0x67, 0x0e,}, .type=ARMOUR, .value=1, .rarity=0,},
+        {.name="Red Potion", .tile={0x00, 0x70, 0xe9, 0xe3, 0xef, 0xe9, 0x70, 0x00,}, .type=FOOD, .value=1, .rarity=1,},
+    },
+};
+
 void init_dungeon( void );
 void update_dungeon( void );
 void draw_dungeon( void );
