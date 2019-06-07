@@ -3,12 +3,16 @@
 #include "overground.h"
 #include "ui.h"
 
+uint32_t timer;
+
 int main (void)
 {
     initialise();
     init_engine();
     _update = update_menu;
     _draw = draw_menu;
+
+    timer=0;
 
     for(ever)
     {
@@ -19,6 +23,12 @@ int main (void)
 
 void update_menu( void )
 {
+    if (timer <= t)
+    {
+        rng();
+        timer = t+15;
+    }
+
     uint8_t buttons;
     buttons = read_buttons();
 

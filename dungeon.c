@@ -19,9 +19,9 @@ void init_dungeon( void )
 
     loot_table = &LOOT_TABLE;
 
-    give_item(&loot_table->items[0]);
-    give_item(&loot_table->items[1]);
-    give_item(&loot_table->items[2]);
+    //give_item(&loot_table->items[0]);
+    //give_item(&loot_table->items[1]);
+    //give_item(&loot_table->items[2]);
 
     dgn_messg = (Window){
         .x=5,
