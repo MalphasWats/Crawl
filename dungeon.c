@@ -1,15 +1,17 @@
 #include "dungeon.h"
 
 #include "tiles.h"
+#include "overground.h"
 
 uint8_t level;
-Window dgn_messg;
+Window dgn_messg, win_hp;
 
 void init_dungeon( void )
 {
     display_mode(NORMAL);
 
     level = 1;
+
     generate_dungeon();
 
     _update = update_dungeon;
@@ -32,12 +34,29 @@ void init_dungeon( void )
     };
 
     show_window(&dgn_messg, THREE_SECONDS);
+
+    win_hp = (Window){
+        .x=0,
+        .y=0,
+        .w=3,
+        .h=2,
+        ._draw=draw_hp,
+    };
+
+    show_window(&win_hp, FIXED);
 }
 
 void wndw_level(Window* w)
 {
     draw_small_string("LEVEL ", (w->x+1)*8, (w->y+1)*8+2);
     draw_small_int(level, 0, (w->x+4)*8, (w->y+1)*8+2);
+}
+
+void draw_hp(Window* w)
+{
+    draw_small_int(player.hp, 0, w->x+6, w->y+6);
+    draw_small_string("/", w->x+10, w->y+6);
+    draw_small_int(player.max_hp, 0, w->x+14, w->y+6);
 }
 
 void update_dungeon( void )
@@ -59,7 +78,8 @@ void update_dungeon( void )
     if (player.hp <=  0)
     {
         player.alive=FALSE;
-
+        _update = update_dead;
+        _draw = draw_dead;
     }
 }
 
@@ -104,6 +124,8 @@ void generate_dungeon( void )
 
     player.x=3;
     player.y=2;
+
+    reset_viewport();
 }
 
 void spawn_mob(uint8_t x, uint8_t y, uint8_t mob)
@@ -133,4 +155,23 @@ void spawn_mob(uint8_t x, uint8_t y, uint8_t mob)
             break;
         }
     }
+}
+
+void update_dead( void )
+{
+    uint8_t buttons;
+    buttons = read_buttons();
+
+    //TODO: Debouncing
+    if(buttons == BTN_A)
+    {
+        init_overground();
+    }
+}
+
+void draw_dead( void )
+{
+    clear_buffer();
+    draw_small_string("You Died", 6*8, 3*8+2);
+    draw_battery();
 }

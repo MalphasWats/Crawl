@@ -5,7 +5,7 @@ Viewport viewport = {.x=0, .y=0, .offset_x=0, .offset_y=0};
 
 Floater floaters[MAX_FLOATERS];
 
-Window win_inventory, win_hp;
+Window win_inventory;
 const __flash Item* inventory_slots[MAX_INVENTORY];
 
 int8_t inventory_cursor;
@@ -41,16 +41,6 @@ void init_engine( void )
         inventory_slots[i] = 0;
 
     inventory_cursor = 2;
-
-    win_hp = (Window){
-        .x=0,
-        .y=0,
-        .w=3,
-        .h=2,
-        ._draw=draw_hp,
-    };
-
-    show_window(&win_hp, FIXED);
 }
 
 void gameloop( void )
@@ -76,13 +66,6 @@ void gameloop( void )
     draw_floaters();
     draw_windows();
     draw();
-}
-
-void draw_hp(Window* w)
-{
-    draw_small_int(player.hp, 0, w->x+6, w->y+6);
-    draw_small_string("/", w->x+10, w->y+6);
-    draw_small_int(player.max_hp, 0, w->x+14, w->y+6);
 }
 
 void draw_map()
@@ -164,6 +147,14 @@ void draw_floaters( void )
                      );
         }
     }
+}
+
+void reset_viewport( void )
+{
+    viewport.x=0;
+    viewport.y=0;
+    viewport.offset_x=0;
+    viewport.offset_y=0;
 }
 
 void move_viewport( void )
@@ -301,19 +292,18 @@ void move_player(int8_t dx, int8_t dy)
     // Simple InBounds
     if (px < 0 || px >= map->cols || py < 0 || py >= map->rows)
     {
-        set_bump_ani(dx, dy);
+        set_bump_ani(dx, dy, FALSE);
     }
 
     Tile tile = get_tile_at(px, py);
     collide_mob = get_mob_at(px, py);
     if (collide_mob != 0)
     {
-        set_bump_ani(dx, dy);
+        set_bump_ani(dx, dy, TRUE);
         hit_mob(&player, collide_mob);
     }
     else if (tile.flags & COLLIDE_FLAG)
     {
-        set_bump_ani(dx, dy);
         collide_x = px;
         collide_y = py;
 
@@ -322,6 +312,11 @@ void move_player(int8_t dx, int8_t dy)
             click();
             map->tiles[collide_y*map->cols+collide_x] += 1;
             give_item(&loot_table->items[ rng() % loot_table->num_items ]);
+            set_bump_ani(dx, dy, TRUE);
+        }
+        else
+        {
+            set_bump_ani(dx, dy, FALSE);
         }
     }
     else
@@ -363,8 +358,9 @@ void update_mobs( void )
                         return;
                     }
                     Tile tile = get_tile_at(mx, my);
+                    Mob* mob = get_mob_at(mx, my);
                     //TODO: make sure the new place still allows for LoS?
-                    if (!(tile.flags & COLLIDE_FLAG))
+                    if (!(tile.flags & COLLIDE_FLAG) && mob == 0)
                     {
                         dist = distance(player.x, player.y, mx, my);
                         if (dist < best_dist)
@@ -374,15 +370,13 @@ void update_mobs( void )
                         }
                     }
                 }
-                mobs[m].x += DIRX[best_dir];
-                mobs[m].y += DIRY[best_dir];
-
-                mobs[m].offset_x = -8*DIRX[best_dir];
-                mobs[m].offset_y = -8*DIRY[best_dir];
-
-                if (best_dist == 1)
+                if (best_dist < 255)
                 {
-                    hit_mob(&mobs[m], &player);
+                    mobs[m].x += DIRX[best_dir];
+                    mobs[m].y += DIRY[best_dir];
+
+                    mobs[m].offset_x = -8*DIRX[best_dir];
+                    mobs[m].offset_y = -8*DIRY[best_dir];
                 }
             }
 
@@ -413,14 +407,17 @@ void update_mobs( void )
     _update = mob_move_ani;
 }
 
-void set_bump_ani(int8_t dx, int8_t dy)
+void set_bump_ani(int8_t dx, int8_t dy, bool turn)
 {
     player.offset_x = 0;
     player.offset_y = 0;
     player.counter = 8;
     player.dx = dx;
     player.dy = dy;
-    _update = player_bump_ani;
+    if (turn)
+        _update = player_bumpturn_ani;
+    else
+        _update = player_bump_ani;
 }
 
 void player_bump_ani( void )
@@ -436,6 +433,21 @@ void player_bump_ani( void )
 
     if (player.counter == 0)
         _update = _update_return;
+}
+
+void player_bumpturn_ani( void )
+{
+    player.offset_x += player.dx;
+    player.offset_y += player.dy;
+    player.counter -= 1;
+    if (player.counter == 4)
+    {
+        player.dx *= -1;
+        player.dy *= -1;
+    }
+
+    if (player.counter == 0)
+        _update = update_mobs;
 }
 
 void player_walk_ani( void )
@@ -573,7 +585,8 @@ bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
 void hit_mob(Mob* attacker, Mob* defender)
 {
     //TODO: deal with defence
-    defender->hp -= attacker->damage;
+    uint8_t def = rng() % (defender->defence+1);
+    defender->hp -= attacker->damage - def;
 
     add_floater((Floater){
         .x=defender->x*8,
@@ -664,6 +677,14 @@ void update_inventory( void )
                     const __flash Item* tmp=inventory_slots[inventory_cursor];
                     inventory_slots[inventory_cursor] = inventory_slots[1];
                     inventory_slots[1]=tmp;
+                }
+                if (inventory_slots[inventory_cursor]->type == FOOD)
+                {
+                    player.hp += inventory_slots[inventory_cursor]->value;
+                    inventory_slots[inventory_cursor] = 0;
+
+                    if (player.hp > player.max_hp)
+                        player.hp = player.max_hp;
                 }
             }
         }

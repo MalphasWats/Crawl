@@ -141,8 +141,6 @@ static const __flash uint8_t STATUS_FLOATER_MASKS[] = {
 void init_engine( void );
 void gameloop( void );
 
-void draw_hp(Window* w);
-
 void draw_map();
 
 void add_floater(Floater f);
@@ -159,9 +157,11 @@ void player_walk_ani( void );
 
 void mob_move_ani( void );
 
-void set_bump_ani(int8_t dx, int8_t dy);
+void set_bump_ani(int8_t dx, int8_t dy, bool turn);
 void player_bump_ani( void );
+void player_bumpturn_ani( void );
 
+void reset_viewport( void );
 void move_viewport( void );
 void update_viewport_ani( void );
 

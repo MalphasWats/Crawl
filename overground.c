@@ -19,6 +19,12 @@ void init_overground( void )
         }
     }
 
+    for (uint8_t m=0 ; m<MAX_MOBS ; m++)
+    {
+        mobs[m].type = 0;
+        mobs[m].alive = FALSE;
+    }
+
     player = (Mob){
         .x=11,
         .y=4,
@@ -39,6 +45,9 @@ void init_overground( void )
     _draw = draw_overground;
     _update_return = _update;
     _draw_return = _draw;
+
+
+    reset_viewport();
 }
 
 void update_overground( void )

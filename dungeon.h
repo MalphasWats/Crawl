@@ -45,8 +45,11 @@ void update_dungeon( void );
 void draw_dungeon( void );
 
 void wndw_level(Window* w);
+void draw_hp(Window* w);
 
 void generate_dungeon( void );
 void spawn_mob(uint8_t x, uint8_t y, uint8_t mob);
 
+void update_dead( void );
+void draw_dead( void );
 #endif
