@@ -49,10 +49,17 @@ void update_dungeon( void )
     //place corpses.
     for (uint8_t m=0 ; m<MAX_MOBS ; m++)
     {
-        if (!mobs[m].alive)
+        if (!mobs[m].alive && mobs[m].type > 0)
         {
             map->tiles[mobs[m].y*map->cols+mobs[m].x] = SKULL_TILE;
         }
+    }
+
+    // check if player dead.
+    if (player.hp <=  0)
+    {
+        player.alive=FALSE;
+
     }
 }
 
