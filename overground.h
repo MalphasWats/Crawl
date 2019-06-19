@@ -26,7 +26,5 @@ static const __flash Map OVERGROUND = {
 void init_overground( void );
 void update_overground( void );
 void draw_overground( void );
-void fade_to_black( void );
-void wait_for_fade( void );
 
 #endif

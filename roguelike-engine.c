@@ -286,6 +286,8 @@ void check_player_turn( void )
 // TODO: use DIRX & DIRY
 void move_player(int8_t dx, int8_t dy)
 {
+    //TODO: check for mob attacks
+
     int16_t px = player.x+dx;
     int16_t py = player.y+dy;
 
@@ -312,6 +314,14 @@ void move_player(int8_t dx, int8_t dy)
             click();
             map->tiles[collide_y*map->cols+collide_x] += 1;
             give_item(&loot_table->items[ rng() % loot_table->num_items ]);
+            set_bump_ani(dx, dy, TRUE);
+        }
+        else if (tile.flags & FLAG_DESTRUCTABLE)
+        {
+            click();
+            map->tiles[collide_y*map->cols+collide_x] += 1;
+            if (rng() % 5 == 0)
+                give_item(&loot_table->items[ 2 ]);
             set_bump_ani(dx, dy, TRUE);
         }
         else

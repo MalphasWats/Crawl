@@ -2,15 +2,16 @@
 
 #include "tiles.h"
 #include "overground.h"
+#include "transitions.h"
 
-uint8_t level;
+uint8_t level=1;
 Window dgn_messg, win_hp;
 
 void init_dungeon( void )
 {
     display_mode(NORMAL);
 
-    level = 1;
+    //level = 1;
 
     generate_dungeon();
 
@@ -62,6 +63,12 @@ void draw_hp(Window* w)
 void update_dungeon( void )
 {
     // Check for exit here...
+    Tile tile = get_tile_at(player.x, player.y);
+    if (tile.flags & EXIT_DOWN_FLAG)
+    {
+        level += 1;
+        set_transition(FADE_TO_BLACK, init_dungeon);
+    }
 
     check_player_turn();
 
@@ -122,8 +129,8 @@ void generate_dungeon( void )
         }
     }
 
-    player.x=3;
-    player.y=2;
+    player.x=2;
+    player.y=1;
 
     reset_viewport();
 }
