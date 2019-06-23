@@ -695,6 +695,9 @@ void update_inventory( void )
 
                     if (player.hp > player.max_hp)
                         player.hp = player.max_hp;
+
+                    _update = update_mobs;
+                    close_window(&win_inventory);
                 }
             }
         }
