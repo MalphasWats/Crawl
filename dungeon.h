@@ -58,6 +58,7 @@ void reset_labels( void );
 void fill_cavern( uint8_t x, uint8_t y, uint8_t old_flag, uint8_t new_flag );
 void carve_tunnels( void );
 void fill_small_caverns( void );
+void place_chests( void );
 
 void generate_dungeon( void );
 void spawn_mob(uint8_t x, uint8_t y, uint8_t mob);

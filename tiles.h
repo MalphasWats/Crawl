@@ -28,6 +28,7 @@ static const __flash Tile TILES[] = {
 #define FLOOR 3
 #define BLOCK 12
 #define DOOR 10
+#define CHEST 13
 
 
 #define SKULL_TILE 17

@@ -134,6 +134,9 @@ void generate_random_dungeon( void )
     if (num_caverns > 1)
         fill_small_caverns();
     reset_labels();
+
+    place_chests();
+
     bool player_placed = FALSE;
 
     for (uint8_t y=0 ; y<map->rows ; y++)
@@ -439,6 +442,36 @@ void generate_dungeon( void )
     player.y=1;
 
     reset_viewport();
+}
+
+void place_chests( void )
+{
+    uint8_t exits;
+    uint8_t chests_placed = 0;
+    uint16_t i, x, y;
+    while(chests_placed < 3)
+    {
+        for (i=0 ; i<map->rows*map->cols ; i=i+rng() % (map->rows*map->cols))
+        {
+            exits = 0;
+            x = i%map->cols;
+            y = i/map->cols;
+            if (x>0 && x<map->cols-1 && y>0 && y<map->rows-1)
+            {
+                for (uint8_t d=0 ; d<8 ; d++)
+                {
+                    if ( map->tiles[ ( (y+DIRY[d])*map->cols)+(x+DIRX[d]) ] > 0 )
+                        exits += 1;
+                }
+                if (exits == 8 && map->tiles[i] == 1)
+                {
+                    chests_placed += 1;
+                    map->tiles[ i ] = CHEST;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void spawn_mob(uint8_t x, uint8_t y, uint8_t mob)
