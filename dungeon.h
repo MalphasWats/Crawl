@@ -49,6 +49,16 @@ void draw_dungeon( void );
 void wndw_level(Window* w);
 void draw_hp(Window* w);
 
+void generate_random_dungeon( void );
+void cellular_automaton( void );
+void trim_holes( void );
+void kill_diags( void );
+uint8_t label_caverns( void );
+void reset_labels( void );
+void fill_cavern( uint8_t x, uint8_t y, uint8_t old_flag, uint8_t new_flag );
+void carve_tunnels( void );
+void fill_small_caverns( void );
+
 void generate_dungeon( void );
 void spawn_mob(uint8_t x, uint8_t y, uint8_t mob);
 

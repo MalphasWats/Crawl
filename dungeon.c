@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "dungeon.h"
 
 #include "tiles.h"
@@ -13,7 +14,7 @@ void init_dungeon( void )
 
     //level = 1;
 
-    generate_dungeon();
+    generate_random_dungeon();
 
     _update = update_dungeon;
     _draw = draw_dungeon;
@@ -104,6 +105,311 @@ void draw_dungeon( void )
     }
 
     draw_mob(&player);
+}
+
+void generate_random_dungeon( void )
+{
+    map->tileset = &TILES[0];
+    map->cols = 32;
+    map->rows = 16;
+
+    for (uint8_t y=0 ; y<map->rows ; y++)
+    {
+        for (uint8_t x=0 ; x<map->cols ; x++)
+        {
+            if ( rng() & 1 )
+                map->tiles[y*map->cols+x] = 0;
+            else
+                map->tiles[y*map->cols+x] = 1;
+        }
+    }
+
+    cellular_automaton();
+    trim_holes();
+    kill_diags();
+    label_caverns();
+    carve_tunnels();
+    reset_labels();
+    uint8_t num_caverns = label_caverns();
+    if (num_caverns > 1)
+        fill_small_caverns();
+    reset_labels();
+    bool player_placed = FALSE;
+
+    for (uint8_t y=0 ; y<map->rows ; y++)
+    {
+        for (uint8_t x=0 ; x<map->cols ; x++)
+        {
+            if ( map->tiles[y*map->cols+x] == 1 )
+            {
+                map->tiles[y*map->cols+x] = FLOOR;
+                if (!player_placed)
+                {
+                    player.x=x;
+                    player.y=y;
+                    player_placed = TRUE;
+
+                    map->tiles[y*map->cols+x] = 8;
+                }
+            }
+            else if (map->tiles[y*map->cols+x] == 0)
+                map->tiles[y*map->cols+x] = BLOCK;
+        }
+    }
+    uint8_t furthest_distance=0;
+    uint8_t furthest_x=0;
+    uint8_t furthest_y=0;
+    for (uint8_t y=1 ; y<map->rows-1 ; y++)
+    {
+        for (uint8_t x=1 ; x<map->cols-1 ; x++)
+        {
+            uint8_t d = distance(player.x, player.y, x, y);
+            if (d > furthest_distance && map->tiles[y*map->cols+x] == FLOOR)
+            {
+                furthest_distance = d;
+                furthest_x = x;
+                furthest_y = y;
+            }
+        }
+    }
+    map->tiles[furthest_y*map->cols+furthest_x] = 9;
+
+    reset_viewport();
+}
+
+void cellular_automaton( void )
+{
+    Map* new_map = malloc(2 + 2 + 3 + MAP_COLS_MAX*MAP_ROWS_MAX);
+    new_map->tileset = map->tileset;
+    new_map->rows = map->rows;
+    new_map->cols = map->cols;
+    uint8_t neighbours;
+
+    for (uint8_t y=0 ; y<map->rows ; y++)
+    {
+        for (uint8_t x=0 ; x<map->cols ; x++)
+        {
+            if ( x == 0 || y == 0 || y == map->rows-1 || x == map->cols-1 )
+                new_map->tiles[y*map->cols+x] = 0;
+            else
+            {
+                neighbours = 0;
+
+                neighbours += map->tiles[ ((y-1)*map->cols)+(x-1) ] == 0;
+                neighbours += map->tiles[ ((y-1)*map->cols)+x ] == 0;
+                neighbours += map->tiles[ ((y-1)*map->cols)+(x+1) ] == 0;
+
+                neighbours += map->tiles[ (y*map->cols)+(x-1) ] == 0;
+                neighbours += map->tiles[ (y*map->cols)+(x+1) ] == 0;
+
+                neighbours += map->tiles[ ((y+1)*map->cols)+(x-1) ] == 0;
+                neighbours += map->tiles[ ((y+1)*map->cols)+x ] == 0;
+                neighbours += map->tiles[ ((y+1)*map->cols)+(x+1) ] == 0;
+
+                if ( map->tiles[ (y*map->cols)+x ] == 0 )
+                {
+                    if ( neighbours >= 3 && neighbours <=8 )
+                        new_map->tiles[(y*map->cols)+x] = 0;
+                    else
+                        new_map->tiles[(y*map->cols)+x] = 1;
+                }
+                else
+                {
+                    if ( neighbours == 6 ||
+                         neighbours == 7 ||
+                         neighbours == 8 )
+                        new_map->tiles[(y*map->cols)+x] = 0;
+                    else
+                        new_map->tiles[(y*map->cols)+x] = 1;
+                }
+            }
+        }
+    }
+    free(map);
+    map = new_map;
+}
+
+void trim_holes( void )
+{
+    uint8_t exits;
+    for (uint8_t y=1 ; y<map->rows-1 ; y++)
+    {
+        for (uint8_t x=1 ; x<map->cols-1 ; x++)
+        {
+            exits = 0;
+            for (uint8_t d=0 ; d<4 ; d++)
+            {
+                if ( map->tiles[ ( (y+DIRY[d])*map->cols)+(x+DIRX[d]) ] > 0 )
+                    exits += 1;
+            }
+            if (exits == 0 && map->tiles[ (y*map->cols)+x ] > 0)
+                map->tiles[ (y*map->cols)+x ] = 0;
+            else if (exits == 3 && map->tiles[ (y*map->cols)+x ] == 0)
+                map->tiles[ (y*map->cols)+x ] = 1;
+        }
+    }
+}
+
+void kill_diags( void )
+{
+    uint8_t pattern;
+    for (uint8_t y=1 ; y<map->rows-1 ; y++)
+    {
+        for (uint8_t x=1 ; x<map->cols-1 ; x++)
+        {
+            pattern = 0;
+            pattern |= map->tiles[ (y*map->cols)+x ] << 0;
+            pattern |= map->tiles[ (y*map->cols)+(x+1) ] << 1;
+            pattern |= map->tiles[ ((y+1)*map->cols)+x ] << 2;
+            pattern |= map->tiles[ ((y+1)*map->cols)+(x+1) ] << 3;
+
+            if (pattern == 0b0110 || pattern == 0b1001)
+            {
+                map->tiles[ (y*map->cols)+x ] = 1;
+                map->tiles[ (y*map->cols)+(x+1) ] = 1;
+                map->tiles[ ((y+1)*map->cols)+x ] = 1;
+                map->tiles[ ((y+1)*map->cols)+(x+1) ] =1;
+            }
+        }
+    }
+}
+
+uint8_t label_caverns( void )
+{
+    reset_labels();
+    uint8_t flag = 2;
+    for (uint8_t y=1 ; y<map->rows-1 ; y++)
+    {
+        for (uint8_t x=1 ; x<map->cols-1 ; x++)
+        {
+            if (map->tiles[ (y*map->cols)+x ] == 1)
+            {
+                fill_cavern(x, y, 1, flag);
+                flag += 1;
+            }
+        }
+    }
+    return flag-2;
+}
+
+void reset_labels( void )
+{
+    for (uint8_t y=0 ; y<map->rows ; y++)
+    {
+        for (uint8_t x=0 ; x<map->cols ; x++)
+        {
+            if ( map->tiles[y*map->cols+x] > 0)
+            {
+                map->tiles[y*map->cols+x] = 1;
+            }
+        }
+    }
+}
+
+void fill_cavern( uint8_t x, uint8_t y, uint8_t old_flag, uint8_t new_flag )
+{
+    if (map->tiles[ (y*map->cols)+x ] == old_flag)
+    {
+        map->tiles[ (y*map->cols)+x ] = new_flag;
+        for (uint8_t d=0 ; d<4 ; d++)
+        {
+            fill_cavern(x+DIRX[d], y+DIRY[d], old_flag, new_flag);
+        }
+    }
+}
+
+//TODO: maybe make doors
+void carve_tunnels( void )
+{
+    uint8_t pattern;
+    for (uint8_t y=1 ; y<map->rows-1 ; y++)
+    {
+        for (uint8_t x=1 ; x<map->cols-3 ; x++)
+        {
+            pattern = 0;
+            for (uint8_t r=0 ; r<4 ; r++)
+            {
+                if (map->tiles[ (y*map->cols)+(x+r) ])
+                    pattern |= 1 << r;
+            }
+
+            if (pattern == 0b1001 || pattern == 0b1101 || pattern == 0b1011)
+            {
+                uint8_t old_flag = map->tiles[ (y*map->cols)+(x+3) ];
+                uint8_t new_flag = map->tiles[ (y*map->cols)+x ];
+                if (new_flag != old_flag)
+                {
+                    map->tiles[ (y*map->cols)+(x+1) ] = new_flag;
+                    map->tiles[ (y*map->cols)+(x+2) ] = new_flag;
+
+                    fill_cavern(x+3, y, old_flag, new_flag);
+                }
+            }
+        }
+
+    }
+
+    for (uint8_t y=1 ; y<map->rows-3 ; y++)
+    {
+        for (uint8_t x=1 ; x<map->cols-1 ; x++)
+        {
+            pattern = 0;
+            for (uint8_t c=0 ; c<4 ; c++)
+            {
+                if (map->tiles[ ((y+c)*map->cols)+x ])
+                    pattern |= 1 << c;
+            }
+
+            if (pattern == 0b1001 || pattern == 0b1101 || pattern == 0b1011)
+            {
+                uint8_t old_flag = map->tiles[ ((y+3)*map->cols)+x ];
+                uint8_t new_flag = map->tiles[ (y*map->cols)+x ];
+                if (new_flag != old_flag)
+                {
+                    map->tiles[ ((y+1)*map->cols)+x ] = new_flag;
+                    map->tiles[ ((y+2)*map->cols)+x ] = new_flag;
+
+                    fill_cavern(x, y+3, old_flag, new_flag);
+                }
+            }
+        }
+
+    }
+}
+
+void fill_small_caverns( void )
+{
+    uint8_t sizes[6] = {0, 0, 0, 0, 0, 0};
+    for (uint8_t y=1 ; y<map->rows-1 ; y++)
+    {
+        for (uint8_t x=1 ; x<map->cols-1 ; x++)
+        {
+            if (map->tiles[ (y*map->cols)+x ] > 0)
+                sizes[ map->tiles[ (y*map->cols)+x ]-1 ] += 1;
+        }
+    }
+    uint8_t biggest = 0;
+    uint8_t flag = 1;
+    for (uint8_t i=0 ; i<6 ; i++)
+    {
+        if (sizes[i] > biggest)
+        {
+            biggest = sizes[i];
+            flag = i+1;
+        }
+    }
+
+    for (uint8_t y=1 ; y<map->rows-1 ; y++)
+    {
+        for (uint8_t x=1 ; x<map->cols-1 ; x++)
+        {
+            if (map->tiles[ (y*map->cols)+x ] > 0 &&
+                map->tiles[ (y*map->cols)+x ] != flag)
+            {
+                map->tiles[ (y*map->cols)+x ] = 0;
+            }
+        }
+    }
 }
 
 

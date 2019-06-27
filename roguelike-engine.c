@@ -151,10 +151,15 @@ void draw_floaters( void )
 
 void reset_viewport( void )
 {
-    viewport.x=0;
-    viewport.y=0;
+    viewport.x= (player.x>>3) * 8;
+    viewport.y= (player.y>>2) * 4;
     viewport.offset_x=0;
     viewport.offset_y=0;
+
+    if (viewport.x+SCREEN_COLUMNS > map->cols)
+        viewport.x = map->cols-SCREEN_COLUMNS;
+    if (viewport.y+SCREEN_ROWS > map->rows)
+        viewport.y = map->rows-SCREEN_ROWS;
 }
 
 void move_viewport( void )
@@ -295,6 +300,7 @@ void move_player(int8_t dx, int8_t dy)
     if (px < 0 || px >= map->cols || py < 0 || py >= map->rows)
     {
         set_bump_ani(dx, dy, FALSE);
+        return;
     }
 
     Tile tile = get_tile_at(px, py);
@@ -322,6 +328,12 @@ void move_player(int8_t dx, int8_t dy)
             map->tiles[collide_y*map->cols+collide_x] += 1;
             if (rng() % 5 == 0)
                 give_item(&loot_table->items[ 2 ]);
+            set_bump_ani(dx, dy, TRUE);
+        }
+        else if (tile.flags & FLAG_DOOR)
+        {
+            click();
+            map->tiles[collide_y*map->cols+collide_x] += 1;
             set_bump_ani(dx, dy, TRUE);
         }
         else
@@ -570,7 +582,7 @@ bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2)
         if (x1 == x2 && y1 == y2)
             return TRUE;
         Tile tile = get_tile_at(x1, y1);
-        if (tile.flags & COLLIDE_FLAG)
+        if (tile.flags & FLAG_LOS)
         {
             return FALSE;
         }
