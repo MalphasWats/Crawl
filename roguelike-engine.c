@@ -37,10 +37,7 @@ void init_engine( void )
         ._draw=draw_inventory,
     };
 
-    for (uint8_t i=0 ; i<MAX_INVENTORY ; i++)
-        inventory_slots[i] = 0;
-
-    inventory_cursor = 2;
+    init_inventory();
 }
 
 void gameloop( void )
@@ -631,6 +628,14 @@ void hit_mob(Mob* attacker, Mob* defender)
         //TODO: play hit sound
         click();
     }
+}
+
+void init_inventory( void )
+{
+    for (uint8_t i=0 ; i<MAX_INVENTORY ; i++)
+        inventory_slots[i] = 0;
+
+    inventory_cursor = 2;
 }
 
 void update_inventory( void )

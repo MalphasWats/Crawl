@@ -176,6 +176,7 @@ bool line_of_sight(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2);
 
 void hit_mob(Mob* attacker, Mob* defender);
 
+void init_inventory( void );
 void update_inventory( void );
 void draw_inventory( Window* w );
 void give_item(const __flash Item* item);

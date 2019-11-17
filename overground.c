@@ -39,6 +39,7 @@ void init_overground( void )
         .damage=1,
         .defence=0,
     };
+    init_inventory();
 
     _update = update_overground;
     _draw = draw_overground;

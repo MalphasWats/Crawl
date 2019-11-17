@@ -78,7 +78,8 @@ void update_dungeon( void )
     {
         if (!mobs[m].alive && mobs[m].type > 0)
         {
-            map->tiles[mobs[m].y*map->cols+mobs[m].x] = SKULL_TILE;
+            if (map->tiles[mobs[m].y*map->cols+mobs[m].x] != STAIRS_DOWN)
+                map->tiles[mobs[m].y*map->cols+mobs[m].x] = SKULL_TILE;
         }
     }
 
@@ -136,6 +137,8 @@ void generate_random_dungeon( void )
     reset_labels();
 
     place_chests();
+    place_pots();
+    place_mobs();
 
     bool player_placed = FALSE;
 
@@ -416,7 +419,7 @@ void fill_small_caverns( void )
 }
 
 
-void generate_dungeon( void )
+void generate_test_dungeon( void )
 {
     // Copy test map
     map->tileset = TEST_DUNGEON.tileset;
@@ -444,16 +447,17 @@ void generate_dungeon( void )
     reset_viewport();
 }
 
+//TODO: it is probably possible to generate a level where chests can't be placed like this.
 void place_chests( void )
 {
-    uint8_t exits;
+    uint8_t pattern;
     uint8_t chests_placed = 0;
     uint16_t i, x, y;
     while(chests_placed < 3)
     {
         for (i=0 ; i<map->rows*map->cols ; i=i+rng() % (map->rows*map->cols))
         {
-            exits = 0;
+            pattern = 0;
             x = i%map->cols;
             y = i/map->cols;
             if (x>0 && x<map->cols-1 && y>0 && y<map->rows-1)
@@ -461,12 +465,79 @@ void place_chests( void )
                 for (uint8_t d=0 ; d<8 ; d++)
                 {
                     if ( map->tiles[ ( (y+DIRY[d])*map->cols)+(x+DIRX[d]) ] > 0 )
-                        exits += 1;
+                        pattern |= 1<<d;
                 }
-                if (exits == 8 && map->tiles[i] == 1)
+                if (pattern == 0b11111111 && map->tiles[i] == 1 && chests_placed < 3)
                 {
                     chests_placed += 1;
                     map->tiles[ i ] = CHEST;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void place_pots( void )
+{
+    uint8_t pattern;
+    uint8_t pots_placed = 0;
+    uint16_t i, x, y;
+    while(pots_placed < 13)
+    {
+        for (i=rng() % (map->rows*map->cols) ; i<map->rows*map->cols ; i++)
+        {
+            pattern = 0;
+            x = i%map->cols;
+            y = i/map->cols;
+            if (x>0 && x<map->cols-1 && y>0 && y<map->rows-1)
+            {
+                for (uint8_t d=0 ; d<8 ; d++)
+                {
+                    if ( map->tiles[ ( (y+DIRY[d])*map->cols)+(x+DIRX[d]) ] > 0 )
+                        pattern |= 1<<d;
+                }
+                if ( (pattern == 0b01101110 ||
+                      pattern == 0b10011011 ||
+                      pattern == 0b11001101 ||
+                      pattern == 0b00110111 ||
+                      pattern == 0b00100110 ||
+                      pattern == 0b11000100 ) &&
+                      map->tiles[i] == 1)
+                {
+                    pots_placed += 1;
+                    map->tiles[ i ] = VASE;
+                    if (pattern==0b00100110 || pattern==0b11001000)
+                        break;
+                }
+            }
+        }
+    }
+}
+
+void place_mobs( void )
+{
+    uint8_t pattern;
+    uint8_t mobs_placed = 0;
+    uint16_t i, x, y;
+    while(mobs_placed < 3+level)
+    {
+        for (i=0 ; i<map->rows*map->cols ; i=i+rng() % (map->rows*map->cols))
+        {
+            pattern = 0;
+            x = i%map->cols;
+            y = i/map->cols;
+            if (x>0 && x<map->cols-1 && y>0 && y<map->rows-1)
+            {
+                for (uint8_t d=0 ; d<8 ; d++)
+                {
+                    if ( map->tiles[ ( (y+DIRY[d])*map->cols)+(x+DIRX[d]) ] > 0 )
+                        pattern |= 1<<d;
+                }
+                if (pattern == 0b11111111 && map->tiles[i] == 1)
+                {
+                    mobs_placed += 1;
+                    spawn_mob(x, y, MOB_BLOB); //TODO: choose monsters
                     break;
                 }
             }
@@ -491,8 +562,8 @@ void spawn_mob(uint8_t x, uint8_t y, uint8_t mob)
                 .alive=TRUE,
                 .type=mob,
 
-                .hp=1,
-                .max_hp=1,
+                .hp=2,
+                .max_hp=2,
                 .damage=1,
                 .defence=0,
 

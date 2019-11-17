@@ -29,8 +29,9 @@ static const __flash Tile TILES[] = {
 #define BLOCK 12
 #define DOOR 10
 #define CHEST 13
+#define VASE 15
 
-
+#define STAIRS_DOWN 9
 #define SKULL_TILE 17
 
 static const __flash Tile PLAYER[] = {
